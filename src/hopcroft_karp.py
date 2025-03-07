@@ -56,9 +56,12 @@ class HopcroftKarp:
                     # Check if matched node or unmatched node
                     w = self.matching.get(v)
                     
-                    if self.dist[w] == float('inf'):
-                        self.dist[w] = self.dist[u] + 1
-                        queue.append(w)
+                    if w is None or self.dist[w] == float('inf'):
+                        if w is None:
+                            self.dist[None] = self.dist[u] + 1
+                        else:
+                            self.dist[w] = self.dist[u] + 1
+                            queue.append(w)
         
         return self.dist[None] != float('inf')
     
@@ -77,11 +80,10 @@ class HopcroftKarp:
                 w = self.matching.get(v)
                 
                 # Find an augmenting path
-                if self.dist[w] == self.dist[u] + 1:
-                    if self._dfs(w):
-                        self.matching[v] = u
-                        self.matching[u] = v
-                        return True
+                if w is None or (self.dist[w] == self.dist[u] + 1 and self._dfs(w)):
+                    self.matching[v] = u
+                    self.matching[u] = v
+                    return True
             
             # No augmenting path found
             self.dist[u] = float('inf')
@@ -110,4 +112,4 @@ class HopcroftKarp:
                     if self._dfs(u):
                         matching_size += 1
         
-        return {k: v for k, v in self.matching.items() if k in left_nodes}
+        return {k: v for k, v in self.matching.items() if k in left_nodes and v is not None}
