@@ -20,9 +20,11 @@ def test_change_file_permissions_invalid_path():
     with pytest.raises(FileNotFoundError):
         change_file_permissions("/non/existent/file.txt", 0o644)
 
-def test_change_file_permissions_invalid_permissions():
+def test_change_file_permissions_invalid_permissions(tmp_path):
+    test_file = tmp_path / "invalid_perms.txt"
+    test_file.write_text("Test content")
     with pytest.raises(ValueError):
-        change_file_permissions("/tmp/test.txt", 0o1000)  # Invalid permissions
+        change_file_permissions(str(test_file), 0o1000)  # Invalid permissions
 
 def test_change_file_permissions_invalid_type():
     with pytest.raises(TypeError):
