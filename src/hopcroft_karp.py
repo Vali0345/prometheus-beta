@@ -39,7 +39,7 @@ class HopcroftKarp:
         """
         queue = []
         
-        # Initialize distances
+        # Initialize distances and handle missing nodes
         for u in left_nodes:
             if self.matching.get(u) is None:
                 self.dist[u] = 0
@@ -56,12 +56,13 @@ class HopcroftKarp:
                     # Check if matched node or unmatched node
                     w = self.matching.get(v)
                     
-                    if w is None or self.dist[w] == float('inf'):
-                        if w is None:
-                            self.dist[None] = self.dist[u] + 1
-                        else:
-                            self.dist[w] = self.dist[u] + 1
-                            queue.append(w)
+                    if w is None:
+                        # Found an unmatched right node
+                        self.dist[None] = self.dist[u] + 1
+                    elif self.dist[w] == float('inf'):
+                        # Found a path through this matching
+                        self.dist[w] = self.dist[u] + 1
+                        queue.append(w)
         
         return self.dist[None] != float('inf')
     
@@ -105,11 +106,14 @@ class HopcroftKarp:
         left_nodes = set(self.graph.keys())
         
         # Repeatedly find augmenting paths
-        matching_size = 0
-        while self._bfs(left_nodes):
+        max_matching_attempts = max(1, len(left_nodes))
+        matching_attempts = 0
+        
+        while matching_attempts < max_matching_attempts and self._bfs(left_nodes):
             for u in left_nodes:
                 if self.matching.get(u) is None:
                     if self._dfs(u):
-                        matching_size += 1
+                        matching_attempts += 1
         
-        return {k: v for k, v in self.matching.items() if k in left_nodes and v is not None}
+        return {k: v for k, v in self.matching.items() 
+                if k in left_nodes and v is not None}
