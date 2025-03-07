@@ -1,2 +1,2 @@
-brotli==0.7.0
+brotli==1.1.0
 pytest
