@@ -6,7 +6,7 @@ def is_digit_string(s: str) -> bool:
         s (str): The input string to check.
 
     Returns:
-        bool: True if the string contains only digits, False otherwise.
+        bool: True if the string contains only ASCII digits, False otherwise.
 
     Raises:
         TypeError: If the input is not a string.
@@ -25,9 +25,5 @@ def is_digit_string(s: str) -> bool:
     if not isinstance(s, str):
         raise TypeError("Input must be a string")
     
-    # Check if the string is empty
-    if not s:
-        return False
-    
-    # Use string method to check if all characters are digits
-    return s.isdigit()
+    # Check if the string is empty or contains any non-ASCII digit
+    return bool(s) and all(char in '0123456789' for char in s)
