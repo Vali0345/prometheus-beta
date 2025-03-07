@@ -32,41 +32,42 @@ def compress(data):
     
     # Initialize compression variables
     compressed = bytearray()
-    window_size = 4096  # Typical sliding window size
-    max_match_length = 15  # Maximum match length in 4 bits
-    
-    # Initialize dictionary and pointers
-    dictionary = {}
     current_pos = 0
     
     while current_pos < len(data):
-        # Look for the longest match in the dictionary
-        best_match_length = 0
-        best_match_offset = 0
+        # Look for the longest match in the previous window
+        max_match_length = 0
+        max_match_offset = 0
         
-        # Search back through the window for the longest match
-        search_start = max(0, current_pos - window_size)
-        for offset in range(current_pos - search_start):
+        # Search back through a maximum of 4096-byte window
+        window_start = max(0, current_pos - 4096)
+        window = data[window_start:current_pos]
+        
+        for i in range(len(window)):
             match_length = 0
+            
+            # Check how long the match continues
             while (current_pos + match_length < len(data) and 
-                   match_length < max_match_length and
-                   data[current_pos - offset + match_length] == data[current_pos + match_length]):
+                   data[window_start + i + match_length] == data[current_pos + match_length]):
                 match_length += 1
+                
+                # Stop if match is too long (15 is max with 4 bits)
+                if match_length == 15:
+                    break
             
             # Update best match if found
-            if match_length > best_match_length:
-                best_match_length = match_length
-                best_match_offset = offset
+            if match_length > max_match_length:
+                max_match_length = match_length
+                max_match_offset = current_pos - (window_start + i)
         
         # Encode the match or literal
-        if best_match_length > 2:
-            # Encode match: (offset, length)
-            # Use 12 bits for offset, 4 bits for length
-            match_token = ((best_match_offset & 0xFFF) << 4) | (best_match_length & 0xF)
+        if max_match_length > 2:
+            # Encode a match - 2 bytes: 12 bits for offset, 4 bits for length
+            match_token = ((max_match_offset & 0xFFF) << 4) | (max_match_length & 0xF)
             compressed.extend(match_token.to_bytes(2, byteorder='big'))
-            current_pos += best_match_length
+            current_pos += max_match_length
         else:
-            # Encode literal byte
+            # Encode a literal byte
             compressed.append(data[current_pos])
             current_pos += 1
     
@@ -99,18 +100,18 @@ def decompress(compressed_data):
     current_pos = 0
     
     while current_pos < len(compressed_data):
-        # Check if there's enough data to read a token
+        # If only one byte left or first byte
         if current_pos + 1 >= len(compressed_data):
-            # If only one byte left, treat as literal
+            # Treat as a literal byte
             decompressed.append(compressed_data[current_pos])
             break
         
-        # Read the 2-byte token
+        # Read 2-byte token
         token = int.from_bytes(compressed_data[current_pos:current_pos+2], byteorder='big')
         
         # Extract offset and length
-        offset = (token >> 4) & 0xFFF
-        length = token & 0xF
+        length = token & 0xF  # 4 bits for length
+        offset = (token >> 4) & 0xFFF  # 12 bits for offset
         
         # If length is 0, it's a literal byte
         if length == 0:
@@ -119,9 +120,17 @@ def decompress(compressed_data):
         else:
             # Copy matched sequence
             start = len(decompressed) - offset
+            
+            # Handle invalid references
+            if start < 0:
+                raise ValueError("Invalid compressed data: negative reference")
+            
+            # Copy the matched sequence
             for i in range(length):
-                if start + i < 0:
-                    raise ValueError("Invalid compressed data: negative reference")
+                if start + i >= len(decompressed):
+                    # If the reference exceeds current decompressed data, we may have a problem
+                    raise ValueError("Invalid compressed data: reference out of bounds")
+                
                 decompressed.append(decompressed[start + i])
             
             current_pos += 2
