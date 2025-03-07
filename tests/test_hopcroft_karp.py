@@ -57,7 +57,7 @@ def test_partial_matching():
     
     # Validate matching
     assert len(matching) >= 1  # At least one node matched
-    assert len(matching) <= 3  # Maximum three nodes matched
+    assert len(matching) <= len(graph)  # Not more than number of left nodes
 
 def test_invalid_input():
     """Test error handling for invalid graph input."""
