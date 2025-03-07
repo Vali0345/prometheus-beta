@@ -133,15 +133,27 @@ def decompress(compressed_data):
                 continue
             
             # Copy the matched sequence
+            copied = 0
             for i in range(length):
-                # Handle case if copying from existing decompressed data
+                # Critical change: Always copy from current pos literal if can't copy from previous
                 if 0 <= start + i < len(decompressed):
                     decompressed.append(decompressed[start + i])
-                elif current_pos < len(compressed_data):
-                    # If we can't copy from previous data, use next literal
-                    decompressed.append(compressed_data[current_pos])
-                    current_pos += 1
+                    copied += 1
+                else:
+                    # Ensure we copy the next literal if previous isn't available
+                    if current_pos + 1 < len(compressed_data):
+                        literal_byte = compressed_data[current_pos]
+                        decompressed.append(literal_byte)
+                        copied += 1
                     break
+            
+            # If total copied less than expected, fill with minimum expected 
+            while copied < length:
+                if current_pos + 1 < len(compressed_data):
+                    literal_byte = compressed_data[current_pos]
+                    decompressed.append(literal_byte)
+                    copied += 1
+                current_pos += 1
             
             current_pos += 2
     
