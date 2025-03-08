@@ -1,28 +1,89 @@
-def count_unique_paths(m: int, n: int) -> int:
+def is_prime(n):
     """
-    Count the number of unique paths from top-left to bottom-right 
-    in an m x n grid, moving only right or down.
+    Check if a number is prime.
     
     Args:
-        m (int): Number of rows in the grid
-        n (int): Number of columns in the grid
+        n (int): The number to check for primality.
     
     Returns:
-        int: Number of unique paths
-    
-    Raises:
-        ValueError: If m or n is less than 1
+        bool: True if the number is prime, False otherwise.
     """
-    # Validate input
-    if m < 1 or n < 1:
-        raise ValueError("Grid dimensions must be positive integers")
+    # Handle edge cases
+    if n < 2:
+        return False
     
-    # Initialize DP table
-    dp = [[1] * n for _ in range(m)]
+    # Check for divisibility up to the square root of n
+    for i in range(2, int(n**0.5) + 1):
+        if n % i == 0:
+            return False
+    return True
+
+def find_prime_path(grid):
+    """
+    Find a continuous path of cells forming a prime number sequence.
     
-    # Calculate unique paths
-    for i in range(1, m):
-        for j in range(1, n):
-            dp[i][j] = dp[i-1][j] + dp[i][j-1]
+    Args:
+        grid (List[List[int]]): A 2D grid of integers.
     
-    return dp[m-1][n-1]
+    Returns:
+        List[tuple]: A list of (row, col) coordinates forming a prime path, 
+                     or an empty list if no prime path exists.
+    """
+    # Handle edge cases
+    if not grid or not grid[0]:
+        return []
+    
+    rows, cols = len(grid), len(grid[0])
+    
+    # Directions: up, right, down, left
+    directions = [(-1, 0), (0, 1), (1, 0), (0, -1)]
+    
+    def dfs(row, col, current_path, visited):
+        """
+        Depth-first search to find prime paths.
+        
+        Args:
+            row (int): Current row
+            col (int): Current column
+            current_path (List[tuple]): Current path of coordinates
+            visited (set): Set of visited coordinates
+        
+        Returns:
+            List[tuple]: A valid prime path if found, else empty list
+        """
+        # Check if current path forms a prime sequence
+        current_sequence = [grid[r][c] for r, c in current_path]
+        number = int(''.join(map(str, current_sequence)))
+        
+        if is_prime(number):
+            return current_path
+        
+        # Try all four directions
+        for dx, dy in directions:
+            new_row, new_col = row + dx, col + dy
+            
+            # Check bounds and avoid revisiting
+            if (0 <= new_row < rows and 
+                0 <= new_col < cols and 
+                (new_row, new_col) not in visited):
+                
+                # Create new path and visited set
+                new_path = current_path + [(new_row, new_col)]
+                new_visited = visited.copy()
+                new_visited.add((new_row, new_col))
+                
+                # Recursively search
+                result = dfs(new_row, new_col, new_path, new_visited)
+                if result:
+                    return result
+        
+        return []
+    
+    # Try starting from each cell
+    for r in range(rows):
+        for c in range(cols):
+            path = dfs(r, c, [(r, c)], {(r, c)})
+            if path:
+                return path
+    
+    return []
