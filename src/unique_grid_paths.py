@@ -33,6 +33,10 @@ def find_prime_path(grid):
     if not grid or not grid[0]:
         return []
     
+    # Handle single cell case directly
+    if len(grid) == 1 and len(grid[0]) == 1:
+        return [(0, 0)] if is_prime(grid[0][0]) else []
+    
     rows, cols = len(grid), len(grid[0])
     
     # Directions: up, right, down, left
@@ -68,8 +72,12 @@ def find_prime_path(grid):
                 if is_prime(number) and length > 1:
                     return current_path[start:start+length]
         
+        # If the current single-digit number is prime, it could be a valid result
+        if is_prime(grid[row][col]) and len(current_path) == 1:
+            return current_path
+        
         # Try all four directions
-        best_path = []
+        best_path = current_path
         for dx, dy in directions:
             new_row, new_col = row + dx, col + dy
             
@@ -86,7 +94,7 @@ def find_prime_path(grid):
                 # Recursively search
                 result = dfs(new_row, new_col, new_path, new_visited, max_depth)
                 
-                # Choose the longest or first valid path
+                # Choose the longest path
                 if result and (len(result) > len(best_path)):
                     best_path = result
         
@@ -96,8 +104,12 @@ def find_prime_path(grid):
     best_overall_path = []
     for r in range(rows):
         for c in range(cols):
+            # Prioritize multi-digit prime paths over single-digit
             path = dfs(r, c, [(r, c)], {(r, c)})
-            if path and len(path) > len(best_overall_path):
+            
+            # Prefer longer paths or multi-digit prime paths
+            if (len(path) > len(best_overall_path) or 
+                (len(path) > 1 and len(best_overall_path) <= 1)):
                 best_overall_path = path
     
     return best_overall_path
