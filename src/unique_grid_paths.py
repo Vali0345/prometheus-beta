@@ -41,7 +41,7 @@ def find_prime_path(grid):
     
     # Possible path directions with their respective steps
     path_directions = [
-        # Horizontal
+        # Horizontal, vertical, diagonals
         [(0, 1), (0, -1)],  # Horizontal
         [(1, 0), (-1, 0)],  # Vertical
         [(1, 1), (-1, -1)],  # Diagonal
@@ -99,4 +99,5 @@ def find_prime_path(grid):
                 if path:
                     return path
     
+    # If no multi-digit prime path, return empty list
     return []
