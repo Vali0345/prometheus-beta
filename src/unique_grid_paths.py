@@ -75,7 +75,10 @@ def find_prime_path(grid):
                     number = int(''.join(map(str, sequence)))
                     
                     # Return path if it's a prime with at least 2 digits
-                    if is_prime(number) and len(sequence) > 1:
+                    # Ensure we don't return trivial single-digit primes
+                    if (is_prime(number) and 
+                        len(sequence) > 1 and 
+                        len(str(number)) > 1):
                         return path
                     
                     # Move in the direction
@@ -85,10 +88,13 @@ def find_prime_path(grid):
         return []
     
     # Exhaustive search for prime paths
+    best_path = []
     for r in range(rows):
         for c in range(cols):
             path = find_prime_sequence(r, c)
             if path:
-                return path
+                # Always prefer a multi-digit prime number
+                if len(path) > len(best_path):
+                    best_path = path
     
-    return []
+    return best_path
