@@ -39,63 +39,59 @@ def find_prime_path(grid):
     
     rows, cols = len(grid), len(grid[0])
     
-    # Possible path directions 
+    # Directions for traversal
     directions = [
-        [(0, 1), (0, -1)],     # Horizontal
-        [(1, 0), (-1, 0)],     # Vertical
-        [(1, 1), (-1, -1)],    # Diagonal
-        [(1, -1), (-1, 1)]     # Reverse diagonal
+        (0, 1),   # Right
+        (1, 0),   # Down
+        (0, -1),  # Left
+        (-1, 0)   # Up
     ]
     
-    def find_prime_sequence(start_r, start_c, max_length=None):
+    def find_prime_path_from(start_r, start_c):
         """
-        Find prime sequences with optional max length.
+        Find a prime path starting from a specific cell.
         
         Args:
             start_r (int): Starting row
             start_c (int): Starting column
-            max_length (int, optional): Maximum sequence length
         
         Returns:
-            List[tuple]: Path of a prime number sequence
+            List[tuple]: Path of coordinates forming a prime sequence
         """
-        for dir_set in directions:
-            for dr, dc in dir_set:
+        for depth in range(1, rows * cols + 1):
+            for initial_dir in directions:
                 path = []
                 current_r, current_c = start_r, start_c
+                current_dir = initial_dir
                 
-                # Try extending path in the direction
-                while (0 <= current_r < rows and 
-                       0 <= current_c < cols and 
-                       (max_length is None or len(path) < max_length)):
+                for _ in range(depth):
                     path.append((current_r, current_c))
                     
-                    # Check if current path forms a prime
+                    # Compute number sequence
                     sequence = [grid[r][c] for r, c in path]
                     number = int(''.join(map(str, sequence)))
                     
-                    # Extremely strict conditions for prime path
-                    if (is_prime(number) and 
-                        len(sequence) > 1 and 
-                        len(str(number)) > 1 and 
-                        # Ensure no single-digit primes involved
-                        all(len(str(grid[r][c])) > 1 for r, c in path)):
+                    # Check primality conditions
+                    if is_prime(number) and len(path) > 1:
                         return path
                     
-                    # Move in the direction
-                    current_r += dr
-                    current_c += dc
+                    # Attempt next step
+                    next_r = current_r + current_dir[0]
+                    next_c = current_c + current_dir[1]
+                    
+                    # Check grid bounds
+                    if (0 <= next_r < rows and 0 <= next_c < cols):
+                        current_r, current_c = next_r, next_c
+                    else:
+                        break
         
         return []
     
-    # Exhaustive search for prime paths
-    best_path = []
+    # Search for the first valid prime path
     for r in range(rows):
         for c in range(cols):
-            path = find_prime_sequence(r, c)
+            path = find_prime_path_from(r, c)
             if path:
-                # Always prefer a multi-digit prime number
-                if len(path) > len(best_path):
-                    best_path = path
+                return path
     
-    return best_path
+    return []
