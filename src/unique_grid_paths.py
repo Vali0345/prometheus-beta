@@ -38,7 +38,7 @@ def find_prime_path(grid):
     # Directions: up, right, down, left
     directions = [(-1, 0), (0, 1), (1, 0), (0, -1)]
     
-    def dfs(row, col, current_path, visited):
+    def dfs(row, col, current_path, visited, max_depth=len(grid) * len(grid[0])):
         """
         Depth-first search to find prime paths.
         
@@ -47,18 +47,29 @@ def find_prime_path(grid):
             col (int): Current column
             current_path (List[tuple]): Current path of coordinates
             visited (set): Set of visited coordinates
+            max_depth (int): Limit recursion depth
         
         Returns:
             List[tuple]: A valid prime path if found, else empty list
         """
+        # Limit recursion depth
+        if len(current_path) > max_depth:
+            return []
+        
         # Check if current path forms a prime sequence
         current_sequence = [grid[r][c] for r, c in current_path]
-        number = int(''.join(map(str, current_sequence)))
         
-        if is_prime(number):
-            return current_path
+        # Try sequences of different lengths
+        for length in range(1, len(current_sequence) + 1):
+            for start in range(len(current_sequence) - length + 1):
+                subsequence = current_sequence[start:start+length]
+                number = int(''.join(map(str, subsequence)))
+                
+                if is_prime(number) and length > 1:
+                    return current_path[start:start+length]
         
         # Try all four directions
+        best_path = []
         for dx, dy in directions:
             new_row, new_col = row + dx, col + dy
             
@@ -73,17 +84,20 @@ def find_prime_path(grid):
                 new_visited.add((new_row, new_col))
                 
                 # Recursively search
-                result = dfs(new_row, new_col, new_path, new_visited)
-                if result:
-                    return result
+                result = dfs(new_row, new_col, new_path, new_visited, max_depth)
+                
+                # Choose the longest or first valid path
+                if result and (len(result) > len(best_path)):
+                    best_path = result
         
-        return []
+        return best_path
     
     # Try starting from each cell
+    best_overall_path = []
     for r in range(rows):
         for c in range(cols):
             path = dfs(r, c, [(r, c)], {(r, c)})
-            if path:
-                return path
+            if path and len(path) > len(best_overall_path):
+                best_overall_path = path
     
-    return []
+    return best_overall_path
