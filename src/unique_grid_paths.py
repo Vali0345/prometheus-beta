@@ -58,7 +58,7 @@ def find_prime_path(grid):
         Returns:
             List[tuple]: Path of coordinates forming a prime sequence
         """
-        for depth in range(1, rows * cols + 1):
+        for depth in range(2, rows * cols + 1):  # Start from 2 to ensure multi-digit
             for initial_dir in directions:
                 path = []
                 current_r, current_c = start_r, start_c
@@ -72,7 +72,10 @@ def find_prime_path(grid):
                     number = int(''.join(map(str, sequence)))
                     
                     # Check primality conditions
-                    if is_prime(number) and len(path) > 1:
+                    # Ensure multi-digit prime sequence
+                    if (is_prime(number) and 
+                        len(path) > 1 and 
+                        len(str(number)) > 1):
                         return path
                     
                     # Attempt next step
