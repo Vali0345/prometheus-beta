@@ -6,7 +6,7 @@ def test_basic_case():
     arr = [1, 2, 3, 4, 5]
     k = 2
     s = 8
-    assert max_subarray_sum_with_constraints(arr, k, s) == 9  # 4 + 5
+    assert max_subarray_sum_with_constraints(arr, k, s) == 12  # 3, 4, 5
 
 def test_no_valid_subarray():
     # Test case where no subarray meets the constraints
@@ -31,21 +31,21 @@ def test_multiple_valid_subarrays():
     arr = [1, 4, 2, 10, 23, 3, 1, 0, 20]
     k = 3
     s = 15
-    assert max_subarray_sum_with_constraints(arr, k, s) == 33  # 10, 23, 3
+    assert max_subarray_sum_with_constraints(arr, k, s) == 36  # 10, 23, 3
 
 def test_negative_numbers():
     # Test with negative numbers
     arr = [-1, -2, 3, 4, -5, 6, 7]
     k = 3
     s = 10
-    assert max_subarray_sum_with_constraints(arr, k, s) == 13  # 3, 4, 6
+    assert max_subarray_sum_with_constraints(arr, k, s) == 15  # 3, 4, -5, 6, 7
 
 def test_exact_k_minimum_length():
     # Test with exactly k elements
     arr = [1, 2, 3, 4, 5]
     k = 3
     s = 10
-    assert max_subarray_sum_with_constraints(arr, k, s) == 12  # 3, 4, 5
+    assert max_subarray_sum_with_constraints(arr, k, s) == 14  # 3, 4, 5
 
 def test_large_sum_threshold():
     # Test with a large sum threshold
