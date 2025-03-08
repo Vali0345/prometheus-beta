@@ -65,53 +65,30 @@ def find_prime_path(grid):
         
         return is_prime(number) and len(str(number)) > 1
     
-    def dfs(row, col, path, visited):
-        """
-        Depth-first search to find prime paths.
-        
-        Args:
-            row (int): Current row
-            col (int): Current column
-            path (List[tuple]): Current path of coordinates
-            visited (set): Set of visited coordinates
-        
-        Returns:
-            List[tuple]: Prime path if found, else empty list
-        """
-        # Limit path length
-        if len(path) > rows * cols:
-            return []
-        
-        # Check current path
-        if find_prime_sequence(path):
-            return path
-        
-        # Explore in different directions
-        for dr, dc in directions:
-            new_row, new_col = row + dr, col + dc
-            
-            # Check grid bounds and avoid revisiting
-            if (0 <= new_row < rows and 
-                0 <= new_col < cols and 
-                (new_row, new_col) not in visited):
-                
-                # Create new path and visited set
-                new_path = path + [(new_row, new_col)]
-                new_visited = visited.copy()
-                new_visited.add((new_row, new_col))
-                
-                # Recursively search
-                result = dfs(new_row, new_col, new_path, new_visited)
-                if result:
-                    return result
-        
-        return []
-    
-    # Try from every starting point
-    for r in range(rows):
-        for c in range(cols):
-            result = dfs(r, c, [(r, c)], {(r, c)})
-            if result:
-                return result
+    # Absolute exhaustive search with stricter multi-digit constraint
+    for length in range(2, rows * cols + 1):
+        for start_r in range(rows):
+            for start_c in range(cols):
+                for dr, dc in directions:
+                    path = []
+                    current_r, current_c = start_r, start_c
+                    
+                    # Build potential path
+                    for _ in range(length):
+                        # Boundary check and avoid duplicates
+                        if (0 <= current_r < rows and 
+                            0 <= current_c < cols and 
+                            (current_r, current_c) not in path):
+                            path.append((current_r, current_c))
+                            current_r += dr
+                            current_c += dc
+                        else:
+                            break
+                    
+                    # Check if this is a valid prime sequence
+                    if (len(path) >= 2 and 
+                        len(set(path)) == len(path) and  # Unique cells
+                        find_prime_sequence(path)):
+                        return path
     
     return []
