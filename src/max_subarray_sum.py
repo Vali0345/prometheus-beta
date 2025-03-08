@@ -25,14 +25,23 @@ def max_subarray_sum_with_constraints(A, k, s):
     current_length = 0
     left = 0
     
-    # Iterate through the array
     for right in range(len(A)):
         # Add current element to the window
         current_sum += A[right]
         current_length += 1
         
-        # Shrink window from left if it becomes too long
-        while right - left + 1 > len(A):
+        # Shrink window from left while it's too long
+        while current_length > len(A):
+            current_sum -= A[left]
+            current_length -= 1
+            left += 1
+        
+        # Shrink window from left while sum is too high or length is too long
+        while left < right and (current_sum >= s and current_length >= k):
+            # Update max_sum if it's the first valid sum or larger
+            max_sum = max(max_sum, current_sum)
+            
+            # Remove leftmost element
             current_sum -= A[left]
             current_length -= 1
             left += 1
@@ -40,16 +49,5 @@ def max_subarray_sum_with_constraints(A, k, s):
         # Check if current window meets constraints
         if current_length >= k and current_sum >= s:
             max_sum = max(max_sum, current_sum)
-        
-        # Shrink window from left if sum is too small
-        while current_sum >= s and left <= right:
-            # Update max_sum if window meets constraints
-            if current_length >= k:
-                max_sum = max(max_sum, current_sum)
-            
-            # Remove leftmost element
-            current_sum -= A[left]
-            current_length -= 1
-            left += 1
     
     return max_sum
