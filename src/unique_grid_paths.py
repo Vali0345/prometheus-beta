@@ -47,54 +47,71 @@ def find_prime_path(grid):
         (-1, 0)   # Up
     ]
     
-    def find_prime_path_from(start_r, start_c):
+    def find_prime_sequence(cells):
         """
-        Find a prime path starting from a specific cell.
+        Check if a sequence of cells forms a multi-digit prime number.
         
         Args:
-            start_r (int): Starting row
-            start_c (int): Starting column
+            cells (List[tuple]): List of (row, col) coordinates
         
         Returns:
-            List[tuple]: Path of coordinates forming a prime sequence
+            bool: Whether the sequence forms a multi-digit prime
         """
-        for depth in range(2, rows * cols + 1):  # Start from 2 to ensure multi-digit
-            for initial_dir in directions:
-                path = []
-                current_r, current_c = start_r, start_c
-                current_dir = initial_dir
+        if len(cells) <= 1:
+            return False
+        
+        sequence = [grid[r][c] for r, c in cells]
+        number = int(''.join(map(str, sequence)))
+        
+        return is_prime(number) and len(str(number)) > 1
+    
+    def dfs(row, col, path, visited):
+        """
+        Depth-first search to find prime paths.
+        
+        Args:
+            row (int): Current row
+            col (int): Current column
+            path (List[tuple]): Current path of coordinates
+            visited (set): Set of visited coordinates
+        
+        Returns:
+            List[tuple]: Prime path if found, else empty list
+        """
+        # Limit path length
+        if len(path) > rows * cols:
+            return []
+        
+        # Check current path
+        if find_prime_sequence(path):
+            return path
+        
+        # Explore in different directions
+        for dr, dc in directions:
+            new_row, new_col = row + dr, col + dc
+            
+            # Check grid bounds and avoid revisiting
+            if (0 <= new_row < rows and 
+                0 <= new_col < cols and 
+                (new_row, new_col) not in visited):
                 
-                for _ in range(depth):
-                    path.append((current_r, current_c))
-                    
-                    # Compute number sequence
-                    sequence = [grid[r][c] for r, c in path]
-                    number = int(''.join(map(str, sequence)))
-                    
-                    # Check primality conditions
-                    # Ensure multi-digit prime sequence
-                    if (is_prime(number) and 
-                        len(path) > 1 and 
-                        len(str(number)) > 1):
-                        return path
-                    
-                    # Attempt next step
-                    next_r = current_r + current_dir[0]
-                    next_c = current_c + current_dir[1]
-                    
-                    # Check grid bounds
-                    if (0 <= next_r < rows and 0 <= next_c < cols):
-                        current_r, current_c = next_r, next_c
-                    else:
-                        break
+                # Create new path and visited set
+                new_path = path + [(new_row, new_col)]
+                new_visited = visited.copy()
+                new_visited.add((new_row, new_col))
+                
+                # Recursively search
+                result = dfs(new_row, new_col, new_path, new_visited)
+                if result:
+                    return result
         
         return []
     
-    # Search for the first valid prime path
+    # Try from every starting point
     for r in range(rows):
         for c in range(cols):
-            path = find_prime_path_from(r, c)
-            if path:
-                return path
+            result = dfs(r, c, [(r, c)], {(r, c)})
+            if result:
+                return result
     
     return []
