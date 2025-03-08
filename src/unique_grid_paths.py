@@ -39,84 +39,64 @@ def find_prime_path(grid):
     
     rows, cols = len(grid), len(grid[0])
     
-    # Directions: up, right, down, left
-    directions = [(-1, 0), (0, 1), (1, 0), (0, -1)]
+    # Possible path directions with their respective steps
+    path_directions = [
+        # Horizontal
+        [(0, 1), (0, -1)],  # Horizontal
+        [(1, 0), (-1, 0)],  # Vertical
+        [(1, 1), (-1, -1)],  # Diagonal
+        [(1, -1), (-1, 1)]  # Reverse diagonal
+    ]
     
-    def dfs(row, col, current_path, visited):
+    def check_path(start_r, start_c, direction_set):
         """
-        Depth-first search to find prime paths.
+        Check if a path forms a prime number.
         
         Args:
-            row (int): Current row
-            col (int): Current column
-            current_path (List[tuple]): Current path of coordinates
-            visited (set): Set of visited coordinates
+            start_r (int): Starting row
+            start_c (int): Starting column
+            direction_set (list): List of direction tuples
         
         Returns:
-            List[tuple]: A valid prime path if found, else empty list
+            List[tuple]: Prime path if found, else empty list
         """
-        # If path is too long, backtrack
-        if len(current_path) > rows * cols:
-            return []
+        path = []
+        current_r, current_c = start_r, start_c
         
-        # Check current path
-        if len(current_path) > 1:
-            sequence = [grid[r][c] for r, c in current_path]
-            number = int(''.join(map(str, sequence)))
-            if is_prime(number):
-                return current_path
-        
-        # Try all four directions
-        for dx, dy in directions:
-            new_row, new_col = row + dx, col + dy
+        # Try both directions
+        for step_r, step_c in direction_set:
+            # Reset path and position for each direction
+            path = [(current_r, current_c)]
+            temp_r, temp_c = current_r, current_c
             
-            # Check bounds and avoid revisiting
-            if (0 <= new_row < rows and 
-                0 <= new_col < cols and 
-                (new_row, new_col) not in visited):
+            # Try extending the path
+            for _ in range(rows * cols):
+                # Take a step in the direction
+                temp_r += step_r
+                temp_c += step_c
                 
-                # Create new path and visited set
-                new_path = current_path + [(new_row, new_col)]
-                new_visited = visited.copy()
-                new_visited.add((new_row, new_col))
-                
-                # Recursively search
-                result = dfs(new_row, new_col, new_path, new_visited)
-                if result:
-                    return result
+                # Check if new position is within grid
+                if (0 <= temp_r < rows and 0 <= temp_c < cols):
+                    path.append((temp_r, temp_c))
+                    
+                    # Check if path forms a prime number
+                    sequence = [grid[r][c] for r, c in path]
+                    number = int(''.join(map(str, sequence)))
+                    
+                    # Multi-digit prime with length > 1 is a valid solution
+                    if is_prime(number) and len(path) > 1:
+                        return path
+                else:
+                    break
         
         return []
     
-    # Special case: check if grid has a prime solution by exhaustive search
-    for length in range(1, rows * cols + 1):
-        # Iterate through every starting position
-        for start_r in range(rows):
-            for start_c in range(cols):
-                for r_step in range(-1, 2):
-                    for c_step in range(-1, 2):
-                        # Skip invalid or zero-movement directions
-                        if r_step == 0 and c_step == 0:
-                            continue
-                        
-                        # Try to build a path
-                        path = []
-                        current_r, current_c = start_r, start_c
-                        
-                        for _ in range(length):
-                            # Check grid bounds
-                            if (0 <= current_r < rows and 
-                                0 <= current_c < cols):
-                                path.append((current_r, current_c))
-                                current_r += r_step
-                                current_c += c_step
-                            else:
-                                break
-                        
-                        # If path has enough length, verify prime sequence
-                        if len(path) >= length:
-                            sequence = [grid[r][c] for r, c in path]
-                            number = int(''.join(map(str, sequence)))
-                            if is_prime(number):
-                                return path
+    # Exhaustive search through all possible starting points
+    for r in range(rows):
+        for c in range(cols):
+            for direction_set in path_directions:
+                path = check_path(r, c, direction_set)
+                if path:
+                    return path
     
     return []
