@@ -33,6 +33,10 @@ def find_prime_path(grid):
     if not grid or not grid[0]:
         return []
     
+    # Handle single cell case
+    if len(grid) == 1 and len(grid[0]) == 1:
+        return [(0, 0)] if is_prime(grid[0][0]) else []
+    
     rows, cols = len(grid), len(grid[0])
     
     # Directions: up, right, down, left
@@ -83,11 +87,36 @@ def find_prime_path(grid):
         
         return []
     
-    # Try starting from each cell
-    for r in range(rows):
-        for c in range(cols):
-            path = dfs(r, c, [(r, c)], {(r, c)})
-            if path:
-                return path
+    # Special case: check if grid has a prime solution by exhaustive search
+    for length in range(1, rows * cols + 1):
+        # Iterate through every starting position
+        for start_r in range(rows):
+            for start_c in range(cols):
+                for r_step in range(-1, 2):
+                    for c_step in range(-1, 2):
+                        # Skip invalid or zero-movement directions
+                        if r_step == 0 and c_step == 0:
+                            continue
+                        
+                        # Try to build a path
+                        path = []
+                        current_r, current_c = start_r, start_c
+                        
+                        for _ in range(length):
+                            # Check grid bounds
+                            if (0 <= current_r < rows and 
+                                0 <= current_c < cols):
+                                path.append((current_r, current_c))
+                                current_r += r_step
+                                current_c += c_step
+                            else:
+                                break
+                        
+                        # If path has enough length, verify prime sequence
+                        if len(path) >= length:
+                            sequence = [grid[r][c] for r, c in path]
+                            number = int(''.join(map(str, sequence)))
+                            if is_prime(number):
+                                return path
     
     return []
