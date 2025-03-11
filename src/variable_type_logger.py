@@ -15,20 +15,22 @@ def log_variable_type(variable):
 
     Examples:
         >>> log_variable_type(42)
-        # Logs: INFO:root:Variable type is: <class 'int'>
+        # Logs: Variable type is: <class 'int'>
         >>> log_variable_type("Hello")
-        # Logs: INFO:root:Variable type is: <class 'str'>
+        # Logs: Variable type is: <class 'str'>
     """
-    # Configure basic logging if not already configured
-    logging.basicConfig(level=logging.INFO)
-
-    # Handle None separately
+    # If None was passed, use type(None)
     if variable is None:
-        logging.info("Variable type is: <class 'NoneType'>")
+        type_str = "<class 'NoneType'>"
+        logging.info(f"Variable type is: {type_str}")
         return type(None)
 
-    # Log the type of the variable
-    logging.info(f"Variable type is: {type(variable)}")
+    # Get the type of the variable
+    var_type = type(variable)
+    type_str = f"<class '{var_type.__name__}'>"
+    
+    # Log the type
+    logging.info(f"Variable type is: {type_str}")
     
     # Return the type for potential further use
-    return type(variable)
+    return var_type
