@@ -4,9 +4,19 @@ import io
 import sys
 from src.variable_type_logger import log_variable_type
 
+class LogCapture:
+    def __init__(self):
+        self.captured = []
+
+    def write(self, message):
+        self.captured.append(message)
+
+    def getvalue(self):
+        return ''.join(self.captured)
+
 def test_log_variable_type_with_int():
     # Capture log output
-    log_capture = io.StringIO()
+    log_capture = LogCapture()
     logging.basicConfig(stream=log_capture, level=logging.INFO)
 
     # Test int type
@@ -18,7 +28,7 @@ def test_log_variable_type_with_int():
 
 def test_log_variable_type_with_str():
     # Capture log output
-    log_capture = io.StringIO()
+    log_capture = LogCapture()
     logging.basicConfig(stream=log_capture, level=logging.INFO)
 
     # Test string type
@@ -30,7 +40,7 @@ def test_log_variable_type_with_str():
 
 def test_log_variable_type_with_list():
     # Capture log output
-    log_capture = io.StringIO()
+    log_capture = LogCapture()
     logging.basicConfig(stream=log_capture, level=logging.INFO)
 
     # Test list type
@@ -43,7 +53,7 @@ def test_log_variable_type_with_list():
 
 def test_log_variable_type_with_none():
     # Capture log output
-    log_capture = io.StringIO()
+    log_capture = LogCapture()
     logging.basicConfig(stream=log_capture, level=logging.INFO)
 
     # Test None type
@@ -59,7 +69,7 @@ def test_log_variable_type_with_custom_class():
         pass
 
     # Capture log output
-    log_capture = io.StringIO()
+    log_capture = LogCapture()
     logging.basicConfig(stream=log_capture, level=logging.INFO)
 
     # Test custom class type
@@ -68,4 +78,4 @@ def test_log_variable_type_with_custom_class():
     log_output = log_capture.getvalue().strip()
 
     assert result == TestClass
-    assert "Variable type is: <class" in log_output
+    assert "Variable type is: <class 'TestClass'>" in log_output
