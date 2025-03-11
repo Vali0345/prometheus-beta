@@ -16,9 +16,8 @@ def rod_cutting(prices, n):
     if not prices or n <= 0:
         return 0
     
-    if len(prices) < n:
-        # Pad prices list with zeros if needed
-        prices = prices + [0] * (n - len(prices))
+    # Ensure prices list is long enough
+    extended_prices = prices + [0] * (n - len(prices))
     
     # Initialize DP table
     dp = [0] * (n + 1)
@@ -27,7 +26,9 @@ def rod_cutting(prices, n):
     for i in range(1, n + 1):
         max_val = float('-inf')
         for j in range(1, i + 1):
-            max_val = max(max_val, prices[j - 1] + dp[i - j])
+            # Check the extended prices to handle all rod lengths
+            current_val = extended_prices[j - 1] + dp[i - j]
+            max_val = max(max_val, current_val)
         dp[i] = max_val
     
     return dp[n]
