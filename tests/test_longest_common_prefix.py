@@ -41,5 +41,5 @@ def test_unicode_strings():
 
 def test_case_sensitive():
     """Test that prefix matching is case-sensitive."""
-    assert find_longest_common_prefix(["Apple", "Appetite", "Application"]) == "A"
+    assert find_longest_common_prefix(["Apple", "Appetite", "Application"]) == "App"
     assert find_longest_common_prefix(["apple", "app", "apricot"]) == "ap"
