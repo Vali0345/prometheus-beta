@@ -31,13 +31,17 @@ def is_bipartite(graph: List[List[int]]) -> bool:
     # Color array to track vertex coloring (-1: uncolored, 0: first color, 1: second color)
     colors = [-1] * n
     
-    # Check each uncolored vertex
-    for start in range(n):
-        # Skip if already colored
-        if colors[start] != -1:
-            continue
+    def bfs_color(start: int) -> bool:
+        """
+        Perform BFS coloring from a start vertex.
         
-        # Use BFS to color the graph
+        Args:
+            start (int): Starting vertex for BFS
+        
+        Returns:
+            bool: True if coloring is possible without conflicts, False otherwise
+        """
+        # Initialize start vertex color
         colors[start] = 0
         queue = [start]
         
@@ -46,6 +50,10 @@ def is_bipartite(graph: List[List[int]]) -> bool:
             
             # Check neighbors
             for neighbor in graph[current]:
+                # Vertex cannot be neighbor to itself
+                if neighbor == current:
+                    return False
+                
                 # If neighbor is uncolored, color it with opposite color
                 if colors[neighbor] == -1:
                     colors[neighbor] = 1 - colors[current]
@@ -53,5 +61,17 @@ def is_bipartite(graph: List[List[int]]) -> bool:
                 # If neighbor has same color as current, graph is not bipartite
                 elif colors[neighbor] == colors[current]:
                     return False
+        
+        return True
+    
+    # Check each vertex
+    for start in range(n):
+        # Skip if already colored
+        if colors[start] != -1:
+            continue
+        
+        # If coloring fails for any component, graph is not bipartite
+        if not bfs_color(start):
+            return False
     
     return True
