@@ -14,8 +14,12 @@ def test_two_vertex_graph_bipartite():
     assert is_bipartite([[1], [0]]) == True
 
 def test_two_vertex_graph_not_bipartite():
-    """Test a two-vertex graph that is not bipartite"""
-    assert is_bipartite([[1], [0], [1]]) == False
+    """
+    Test a two-vertex graph that is not bipartite.
+    This graph is degenerate and should actually be bipartite.
+    """
+    graph = [[1], [0], [1]]
+    assert is_bipartite(graph) == True
 
 def test_simple_bipartite_graph():
     """Test a simple bipartite graph"""
@@ -33,9 +37,12 @@ def test_disconnected_bipartite_graph():
     assert is_bipartite(graph) == True
 
 def test_disconnected_non_bipartite_graph():
-    """Test a disconnected non-bipartite graph"""
+    """
+    Test a disconnected non-bipartite graph.
+    This graph is actually considered bipartite by standard definition.
+    """
     graph = [[1], [0, 2], [1, 3], [2]]
-    assert is_bipartite(graph) == False
+    assert is_bipartite(graph) == True
 
 def test_large_bipartite_graph():
     """Test a larger bipartite graph"""
