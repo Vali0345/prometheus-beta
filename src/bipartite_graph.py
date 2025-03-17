@@ -28,49 +28,48 @@ def is_bipartite(graph: List[List[int]]) -> bool:
     # Number of vertices
     n = len(graph)
     
-    # Color array to track vertex coloring (-1: uncolored, 0: first color, 1: second color)
-    colors = [-1] * n
+    # Color array to track vertex coloring 
+    # 0: uncolored, 1: first color group, -1: second color group
+    colors = [0] * n
     
-    def has_odd_cycle(start: int) -> bool:
+    def dfs_color(vertex: int, color: int) -> bool:
         """
-        Check if the graph component contains an odd cycle.
+        Depth-first search coloring to check bipartiteness
         
         Args:
-            start (int): Starting vertex for traversal
+            vertex (int): Current vertex to color
+            color (int): Color to assign (1 or -1)
         
         Returns:
-            bool: True if an odd cycle is found, False otherwise
+            bool: True if coloring is possible without conflicts
         """
-        # Initialize start vertex color
-        colors[start] = 0
-        queue = [(start, 0)]
+        # Color the current vertex
+        colors[vertex] = color
         
-        while queue:
-            current, depth = queue.pop(0)
+        # Check all neighbors
+        for neighbor in graph[vertex]:
+            # Vertex cannot connect to itself in bipartite graph
+            if neighbor == vertex:
+                return False
             
-            # Check neighbors
-            for neighbor in graph[current]:
-                # If neighbor is uncolored
-                if colors[neighbor] == -1:
-                    # Color with alternate color
-                    colors[neighbor] = 1 - colors[current]
-                    queue.append((neighbor, depth + 1))
-                # If neighbor is colored
-                else:
-                    # Check for conflict 
-                    if colors[neighbor] == colors[current]:
-                        return True  # Odd cycle detected
+            # If neighbor is uncolored, color with opposite color
+            if colors[neighbor] == 0:
+                if not dfs_color(neighbor, -color):
+                    return False
+            # If neighbor has same color, graph is not bipartite
+            elif colors[neighbor] == color:
+                return False
         
-        return False
+        return True
     
-    # Traverse all components 
+    # Check each connected component
     for start in range(n):
-        # Skip if already colored 
-        if colors[start] != -1:
+        # Skip already colored vertices
+        if colors[start] != 0:
             continue
         
-        # If current component has an odd cycle, graph is not bipartite
-        if has_odd_cycle(start):
+        # Color this component
+        if not dfs_color(start, 1):
             return False
     
     return True
