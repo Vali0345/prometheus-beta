@@ -21,6 +21,10 @@ def is_bipartite(graph: List[List[int]]) -> bool:
     if graph is None:
         raise ValueError("Graph cannot be None")
     
+    # Empty or single vertex graph is trivially bipartite
+    if len(graph) <= 1:
+        return True
+    
     # Number of vertices
     n = len(graph)
     
