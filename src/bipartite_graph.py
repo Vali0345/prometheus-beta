@@ -1,4 +1,4 @@
-from typing import List, Dict
+from typing import List
 
 def is_bipartite(graph: List[List[int]]) -> bool:
     """
@@ -31,47 +31,46 @@ def is_bipartite(graph: List[List[int]]) -> bool:
     # Color array to track vertex coloring (-1: uncolored, 0: first color, 1: second color)
     colors = [-1] * n
     
-    def bfs_color(start: int) -> bool:
+    def has_odd_cycle(start: int) -> bool:
         """
-        Perform BFS coloring from a start vertex.
+        Check if the graph component contains an odd cycle.
         
         Args:
-            start (int): Starting vertex for BFS
+            start (int): Starting vertex for traversal
         
         Returns:
-            bool: True if coloring is possible without conflicts, False otherwise
+            bool: True if an odd cycle is found, False otherwise
         """
         # Initialize start vertex color
         colors[start] = 0
-        queue = [start]
+        queue = [(start, 0)]
         
         while queue:
-            current = queue.pop(0)
+            current, depth = queue.pop(0)
             
             # Check neighbors
             for neighbor in graph[current]:
-                # Vertex cannot be neighbor to itself
-                if neighbor == current:
-                    return False
-                
-                # If neighbor is uncolored, color it with opposite color
+                # If neighbor is uncolored
                 if colors[neighbor] == -1:
+                    # Color with alternate color
                     colors[neighbor] = 1 - colors[current]
-                    queue.append(neighbor)
-                # If neighbor has same color as current, graph is not bipartite
-                elif colors[neighbor] == colors[current]:
-                    return False
+                    queue.append((neighbor, depth + 1))
+                # If neighbor is colored
+                else:
+                    # Check for conflict 
+                    if colors[neighbor] == colors[current]:
+                        return True  # Odd cycle detected
         
-        return True
+        return False
     
-    # Check each vertex
+    # Traverse all components 
     for start in range(n):
-        # Skip if already colored
+        # Skip if already colored 
         if colors[start] != -1:
             continue
         
-        # If coloring fails for any component, graph is not bipartite
-        if not bfs_color(start):
+        # If current component has an odd cycle, graph is not bipartite
+        if has_odd_cycle(start):
             return False
     
     return True
