@@ -11,6 +11,10 @@ def compute_lps(pattern):
     Returns:
         list: An array of LPS values for each index in the pattern
     """
+    # Handle empty string case
+    if not pattern:
+        return []
+    
     # Length of the previous longest prefix suffix
     lps = [0] * len(pattern)
     length = 0  # Length of the current longest prefix suffix
@@ -50,13 +54,16 @@ def kmp_search(text, pattern):
     
     Raises:
         TypeError: If inputs are not strings
-        ValueError: If pattern is an empty string
+        ValueError: If pattern is an empty string unless text is also empty
     """
     # Input validation
     if not isinstance(text, str) or not isinstance(pattern, str):
         raise TypeError("Both text and pattern must be strings")
     
+    # Special handling for empty pattern and empty text
     if not pattern:
+        if not text:
+            return []
         raise ValueError("Pattern cannot be an empty string")
     
     # If pattern is longer than text, no match is possible
@@ -72,6 +79,10 @@ def kmp_search(text, pattern):
     # Pointers for text and pattern
     i = 0  # text index
     j = 0  # pattern index
+    
+    # Perform case-sensitive search (by keeping case the same)
+    text = text
+    pattern = pattern
     
     while i < len(text):
         # If characters match, move both pointers
