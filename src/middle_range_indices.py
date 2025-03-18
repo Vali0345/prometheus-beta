@@ -28,8 +28,8 @@ def find_middle_range_indices(sorted_list, range_radius):
     
     # Calculate the middle index
     if len(sorted_list) % 2 == 0:
-        # For even-length lists, take the lower middle index
-        middle_index = len(sorted_list) // 2 - 1
+        # For even-length lists, take the upper middle index
+        middle_index = len(sorted_list) // 2
     else:
         # For odd-length lists, take the exact middle index
         middle_index = len(sorted_list) // 2
