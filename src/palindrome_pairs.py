@@ -24,6 +24,10 @@ def find_palindrome_pairs(words):
     result = []
     n = len(words)
     
+    # Special handling for empty list or single word
+    if not words or len(words) <= 1:
+        return []
+    
     # Check every possible pair of words
     for i in range(n):
         for j in range(n):
@@ -34,12 +38,12 @@ def find_palindrome_pairs(words):
             # Concatenate words and check if palindrome
             concatenated = words[i] + words[j]
             if is_palindrome(concatenated):
-                # Only add pairs that weren't added before
-                if (i, j) not in result:
-                    result.append((i, j))
+                result.append((i, j))
     
-    # Special handling for empty list and edge cases
-    if not words or len(words) == 1:
-        return []
+    # Remove duplicates while preserving order
+    unique_result = []
+    for pair in result:
+        if pair not in unique_result:
+            unique_result.append(pair)
     
-    return result
+    return unique_result
