@@ -90,4 +90,4 @@ def inverse_burrows_wheeler_transform(bwt_string, original_index):
     
     # Convert back to original string (remove termination character)
     reconstructed = ''.join(result)
-    return reconstructed.rstrip('$')
+    return reconstructed.split('$')[0]  # Explicitly split to remove termination
