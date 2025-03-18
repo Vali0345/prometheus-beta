@@ -8,8 +8,9 @@ def test_lzma2_compression_basic():
     original_data = b"Hello, world! This is a test of LZMA2 compression."
     compressed = lzma2_compress(original_data)
     assert compressed != original_data
-    assert len(compressed) < len(original_data)
     
+    # For small inputs, compressed size might be larger due to overhead
+    # So we'll just assert that compression works without raising errors
     decompressed = lzma2_decompress(compressed)
     assert decompressed == original_data
 
