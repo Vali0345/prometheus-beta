@@ -75,11 +75,17 @@ def inverse_burrows_wheeler_transform(bwt_string, original_index):
     
     # Create next array for reconstruction
     next_arr = [0] * n
-    seen = {}
+    last_occurrence = {}
+    occurrence_count = {}
+    
+    for i, char in enumerate(bwt_string):
+        occurrence_count[char] = occurrence_count.get(char, 0) + 1
+        last_occurrence[char] = i
+    
     for i, char in enumerate(first_column):
-        count = seen.get(char, 0)
-        next_arr[i] = bwt_string.index(char, count)
-        seen[char] = count + 1
+        count = occurrence_count.get(char, 0)
+        next_arr[i] = last_occurrence[char]
+        occurrence_count[char] -= 1
     
     # Reconstruct the original string
     result = []
@@ -90,4 +96,4 @@ def inverse_burrows_wheeler_transform(bwt_string, original_index):
     
     # Convert back to original string (remove termination character)
     reconstructed = ''.join(result)
-    return reconstructed.split('$')[0]  # Explicitly split to remove termination
+    return reconstructed.rstrip('$')
