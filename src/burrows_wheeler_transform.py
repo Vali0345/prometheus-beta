@@ -69,42 +69,41 @@ def inverse_burrows_wheeler_transform(bwt_string, original_index):
     if original_index < 0 or original_index >= len(bwt_string):
         raise ValueError("Invalid original index")
     
-    # Count character frequencies in the BWT string
-    char_count = {}
-    for char in bwt_string:
-        char_count[char] = char_count.get(char, 0) + 1
-    
-    # Create first column by sorting the last column (BWT)
+    # Sort the BWT string to create the first column
     first_column = sorted(bwt_string)
     
-    # Create the next/previous array to reconstruct the original string
-    next_indices = {}
-    current_count = {}
+    # Create a mapping to track occurrences
+    last_to_first = {}
+    first_occurrence = {}
     
+    # First pass: track first occurrence of each character in first column
     for i, char in enumerate(first_column):
-        # Initialize count tracking for this character
-        if char not in current_count:
-            current_count[char] = 0
+        if char not in first_occurrence:
+            first_occurrence[char] = i
+    
+    # Second pass: create last to first mapping
+    char_count = {}
+    for j, char in enumerate(bwt_string):
+        # Count occurrences of this character in last column
+        count = char_count.get(char, 0)
         
-        # Find the corresponding index in the BWT string
-        for j, bwt_char in enumerate(bwt_string):
-            if bwt_char == char:
-                if current_count[char] == 0:
-                    next_indices[i] = j
-                    break
-                current_count[char] -= 1
+        # Find the corresponding index in first column
+        last_to_first[j] = first_occurrence[char] + count
+        
+        # Increment character count
+        char_count[char] = count + 1
     
     # Reconstruct the original string
     result = []
     current = original_index
     
     for _ in range(len(bwt_string)):
-        # Append character from first column
+        # Append the character from the first column
         result.append(first_column[current])
         
-        # Move to the next index
-        current = next_indices[current]
+        # Move to the next index using last-to-first mapping
+        current = last_to_first[current]
     
-    # Reconstruct and remove termination character
+    # Convert back to original string (remove termination character)
     reconstructed = ''.join(result)
     return reconstructed.rstrip('$')
