@@ -24,12 +24,9 @@ def burrows_wheeler_transform(input_text):
     if not input_text:
         raise ValueError("Input string cannot be empty")
     
-    # Add termination character if not present
-    modified_text = input_text + '$' if '$' not in input_text else input_text
-    
     # Generate all rotations
-    n = len(modified_text)
-    rotations = [modified_text[i:] + modified_text[:i] for i in range(n)]
+    n = len(input_text)
+    rotations = [input_text[i:] + input_text[:i] for i in range(n)]
     
     # Sort rotations lexicographically 
     sorted_rotations = sorted(rotations)
@@ -38,7 +35,7 @@ def burrows_wheeler_transform(input_text):
     bwt_string = ''.join(rotation[-1] for rotation in sorted_rotations)
     
     # Find the index of the original string in sorted rotations
-    original_index = sorted_rotations.index(modified_text)
+    original_index = sorted_rotations.index(input_text)
     
     return bwt_string, original_index
 
@@ -70,43 +67,38 @@ def inverse_burrows_wheeler_transform(bwt_string, original_index):
     if original_index < 0 or original_index >= len(bwt_string):
         raise ValueError("Invalid original index")
     
-    # Count character frequencies in the BWT string
-    char_freq = {}
-    for char in bwt_string:
-        char_freq[char] = char_freq.get(char, 0) + 1
-    
-    # Create first column by sorting the last column (BWT)
+    # Prepare for reconstruction
+    n = len(bwt_string)
     first_column = sorted(bwt_string)
     
-    # Compute the next index for each character
+    # Next index mapping
     next_indices = {}
-    char_counts = {}
+    seen_chars = {}
     
     for i, char in enumerate(first_column):
-        if char not in char_counts:
-            char_counts[char] = 0
+        # Track the occurrences of each character
+        count = seen_chars.get(char, 0)
         
-        # Find the correct occurrence of this character in the BWT string
+        # Find the corresponding index in the BWT string
         for j, bwt_char in enumerate(bwt_string):
+            if bwt_char == char and count == 0:
+                next_indices[i] = j
+                break
             if bwt_char == char:
-                if char_counts[char] == 0:
-                    next_indices[i] = j
-                    break
-                char_counts[char] -= 1
+                count -= 1
+        
+        seen_chars[char] = seen_chars.get(char, 0) + 1
     
     # Reconstruct the original string
     result = []
-    current = original_index
+    current_idx = original_index
     
-    for _ in range(len(bwt_string)):
+    for _ in range(n):
         # Append character from first column
-        result.append(first_column[current])
+        result.append(first_column[current_idx])
         
-        # Move to the next index
-        current = next_indices[current]
+        # Move to next index using the mapping
+        current_idx = next_indices[current_idx]
     
-    # Reconstruct and remove termination character
-    reconstructed = ''.join(result)
-    
-    # Return the string without the termination character
-    return reconstructed.split('$')[0]
+    # Return the reconstructed string
+    return ''.join(result)
