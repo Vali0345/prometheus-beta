@@ -31,13 +31,15 @@ def find_palindrome_pairs(words):
             if i == j:
                 continue
             
-            # Exclude redundant or duplicate pairs
-            if (j, i) in result:
-                continue
-            
             # Concatenate words and check if palindrome
             concatenated = words[i] + words[j]
             if is_palindrome(concatenated):
-                result.append((i, j))
+                # Only add pairs that weren't added before
+                if (i, j) not in result:
+                    result.append((i, j))
+    
+    # Special handling for empty list and edge cases
+    if not words or len(words) == 1:
+        return []
     
     return result
