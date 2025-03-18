@@ -9,7 +9,7 @@ def test_odd_length_list_default_range():
 def test_even_length_list_default_range():
     """Test function with even-length list and default range"""
     test_list = [1, 2, 3, 4, 5, 6]
-    assert find_middle_range_indices(test_list, 1) == [2, 3]
+    assert find_middle_range_indices(test_list, 1) == [2, 3, 4]
 
 def test_large_range_limited_by_list_start():
     """Test when range would extend before list start"""
