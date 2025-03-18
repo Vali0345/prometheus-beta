@@ -71,28 +71,46 @@ def inverse_burrows_wheeler_transform(bwt_string, original_index):
     
     # Create first and last column of the transformation table
     n = len(bwt_string)
+    
+    # Create the first column by sorting the last column
     first_column = sorted(bwt_string)
     
-    # Create next array for reconstruction
-    next_arr = [0] * n
-    last_occurrence = {}
-    occurrence_count = {}
+    # Compute LF mapping (Last-to-First column mapping)
+    # This allows us to efficiently reconstruct the original string
     
-    for i, char in enumerate(bwt_string):
-        occurrence_count[char] = occurrence_count.get(char, 0) + 1
-        last_occurrence[char] = i
+    # Count occurrences of each character in the last column (BWT)
+    last_col_count = {}
+    for char in bwt_string:
+        last_col_count[char] = last_col_count.get(char, 0) + 1
     
+    # Create a dictionary to track the running count of characters
+    running_count = {}
+    lf_mapping = {}
+    
+    # Compute the Last-to-First mapping
     for i, char in enumerate(first_column):
-        count = occurrence_count.get(char, 0)
-        next_arr[i] = last_occurrence[char]
-        occurrence_count[char] -= 1
+        # Find the occurrence number of this character
+        if char not in running_count:
+            running_count[char] = 0
+        
+        # Find the corresponding index in the last column
+        for j, last_char in enumerate(bwt_string):
+            if last_char == char:
+                if running_count[char] == 0:
+                    lf_mapping[j] = i
+                    break
+                running_count[char] -= 1
     
     # Reconstruct the original string
     result = []
-    current = original_index
+    current_index = original_index
+    
     for _ in range(n):
-        result.append(first_column[current])
-        current = next_arr[current]
+        # Append the character from the first column
+        result.append(first_column[current_index])
+        
+        # Move to the next index using the LF mapping
+        current_index = lf_mapping[current_index]
     
     # Convert back to original string (remove termination character)
     reconstructed = ''.join(result)
