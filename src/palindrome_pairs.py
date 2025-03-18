@@ -31,6 +31,10 @@ def find_palindrome_pairs(words):
             if i == j:
                 continue
             
+            # Exclude redundant or duplicate pairs
+            if (j, i) in result:
+                continue
+            
             # Concatenate words and check if palindrome
             concatenated = words[i] + words[j]
             if is_palindrome(concatenated):
