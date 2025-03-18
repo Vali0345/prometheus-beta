@@ -25,25 +25,23 @@ def find_longest_substring(s: str) -> str:
         return ""
     
     # Sliding window approach
-    longest_substring = ""
-    current_substring = ""
+    start = 0
+    max_length = 0
+    max_substring = ""
+    char_map = {}
     
-    for char in s:
-        # If character is already in current substring, 
-        # trim the substring from the first occurrence of the repeated character
-        if char in current_substring:
-            # Keep track of the longest substring found so far
-            if len(current_substring) > len(longest_substring):
-                longest_substring = current_substring
-            
-            # Remove characters up to and including the first repeated character
-            current_substring = current_substring[current_substring.index(char) + 1:] + char
+    for end, char in enumerate(s):
+        # If character is in map and its last position is after or equal to start
+        if char in char_map and char_map[char] >= start:
+            # Move start to the next position after last occurrence of repeated char
+            start = char_map[char] + 1
         else:
-            # Add character to current substring
-            current_substring += char
+            # Update max substring if current substring is longer
+            if end - start + 1 > max_length:
+                max_length = end - start + 1
+                max_substring = s[start:end+1]
+        
+        # Update last seen position of character
+        char_map[char] = end
     
-    # Final check to see if the last substring is the longest
-    if len(current_substring) > len(longest_substring):
-        longest_substring = current_substring
-    
-    return longest_substring
+    return max_substring
