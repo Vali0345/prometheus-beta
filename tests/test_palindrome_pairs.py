@@ -3,33 +3,32 @@ from src.palindrome_pairs import find_palindrome_pairs
 
 def test_basic_palindrome_pairs():
     words = ["bat", "tab", "cat"]
-    expected = [(0, 1), (1, 0)]
-    assert sorted(find_palindrome_pairs(words)) == sorted(expected)
+    result = find_palindrome_pairs(words)
+    assert len(result) == 2
+    assert (0, 1) in result
+    assert (1, 0) in result
 
 def test_complex_palindrome_pairs():
     words = ["abcd", "dcba", "lls", "s", "sssll"]
-    expected = [(0, 1), (1, 0), (3, 4), (4, 3)]
-    assert sorted(find_palindrome_pairs(words)) == sorted(expected)
+    result = find_palindrome_pairs(words)
+    expected_pairs = {(0, 1), (1, 0), (3, 4), (4, 3)}
+    assert set(result) == expected_pairs
 
 def test_empty_list():
     words = []
-    expected = []
-    assert find_palindrome_pairs(words) == expected
+    assert find_palindrome_pairs(words) == []
 
 def test_single_word():
     words = ["hello"]
-    expected = []
-    assert find_palindrome_pairs(words) == expected
+    assert find_palindrome_pairs(words) == []
 
 def test_no_palindrome_pairs():
     words = ["red", "green", "blue"]
-    expected = []
-    assert find_palindrome_pairs(words) == expected
+    assert find_palindrome_pairs(words) == []
 
 def test_duplicate_words():
     words = ["a", "a"]
-    expected = []
-    assert find_palindrome_pairs(words) == expected
+    assert find_palindrome_pairs(words) == []
 
 @pytest.mark.parametrize("words", [
     ["racecar", "level"],
