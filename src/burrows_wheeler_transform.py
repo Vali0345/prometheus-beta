@@ -69,49 +69,42 @@ def inverse_burrows_wheeler_transform(bwt_string, original_index):
     if original_index < 0 or original_index >= len(bwt_string):
         raise ValueError("Invalid original index")
     
-    # Create first and last column of the transformation table
-    n = len(bwt_string)
+    # Count character frequencies in the BWT string
+    char_count = {}
+    for char in bwt_string:
+        char_count[char] = char_count.get(char, 0) + 1
     
-    # Create the first column by sorting the last column
+    # Create first column by sorting the last column (BWT)
     first_column = sorted(bwt_string)
     
-    # Compute LF mapping (Last-to-First column mapping)
-    # This allows us to efficiently reconstruct the original string
+    # Create the next/previous array to reconstruct the original string
+    next_indices = {}
+    current_count = {}
     
-    # Count occurrences of each character in the last column (BWT)
-    last_col_count = {}
-    for char in bwt_string:
-        last_col_count[char] = last_col_count.get(char, 0) + 1
-    
-    # Create a dictionary to track the running count of characters
-    running_count = {}
-    lf_mapping = {}
-    
-    # Compute the Last-to-First mapping
     for i, char in enumerate(first_column):
-        # Find the occurrence number of this character
-        if char not in running_count:
-            running_count[char] = 0
+        # Initialize count tracking for this character
+        if char not in current_count:
+            current_count[char] = 0
         
-        # Find the corresponding index in the last column
-        for j, last_char in enumerate(bwt_string):
-            if last_char == char:
-                if running_count[char] == 0:
-                    lf_mapping[j] = i
+        # Find the corresponding index in the BWT string
+        for j, bwt_char in enumerate(bwt_string):
+            if bwt_char == char:
+                if current_count[char] == 0:
+                    next_indices[i] = j
                     break
-                running_count[char] -= 1
+                current_count[char] -= 1
     
     # Reconstruct the original string
     result = []
-    current_index = original_index
+    current = original_index
     
-    for _ in range(n):
-        # Append the character from the first column
-        result.append(first_column[current_index])
+    for _ in range(len(bwt_string)):
+        # Append character from first column
+        result.append(first_column[current])
         
-        # Move to the next index using the LF mapping
-        current_index = lf_mapping[current_index]
+        # Move to the next index
+        current = next_indices[current]
     
-    # Convert back to original string (remove termination character)
+    # Reconstruct and remove termination character
     reconstructed = ''.join(result)
     return reconstructed.rstrip('$')
