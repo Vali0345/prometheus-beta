@@ -23,12 +23,18 @@ def remove_duplicate_chars(input_string):
     # Split the input string into characters
     chars = list(input_string)
 
+    # Track spaces separately to handle consecutive spaces
+    last_was_space = False
+
     for char in chars:
-        # For each new word or group, reset the seen characters
-        if char.isspace() and (not result or result[-1].isspace()):
-            result.append(char)
+        if char.isspace():
+            # Prevent consecutive spaces
+            if not last_was_space:
+                result.append(char)
+                last_was_space = True
         elif char not in seen_chars:
             result.append(char)
             seen_chars[char] = True
+            last_was_space = False
 
     return ''.join(result)
