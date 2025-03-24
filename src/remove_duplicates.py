@@ -1,6 +1,7 @@
 def remove_duplicate_chars(input_string):
     """
-    Remove duplicate characters from a given string, preserving the original order.
+    Remove duplicate characters from a given string, preserving the original order
+    and ensuring that all characters in the same group (like words) are preserved.
 
     Args:
         input_string (str): The input string to remove duplicates from.
@@ -15,15 +16,19 @@ def remove_duplicate_chars(input_string):
     if not isinstance(input_string, str):
         raise TypeError("Input must be a string")
 
-    # Use a set to track seen characters while preserving order
-    seen_chars = set()
+    # Use a dictionary to track seen characters in each word/group
+    seen_chars = {}
     result = []
 
-    for char in input_string:
-        # Only add character if it hasn't been seen before
-        if char not in seen_chars:
-            result.append(char)
-            seen_chars.add(char)
+    # Split the input string into characters
+    chars = list(input_string)
 
-    # Convert list of unique characters back to string
+    for char in chars:
+        # For each new word or group, reset the seen characters
+        if char.isspace() and (not result or result[-1].isspace()):
+            result.append(char)
+        elif char not in seen_chars:
+            result.append(char)
+            seen_chars[char] = True
+
     return ''.join(result)
