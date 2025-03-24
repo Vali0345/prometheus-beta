@@ -14,21 +14,23 @@ def setup_emoji_logger(name='emoji_logger', log_level=logging.INFO):
     """
     # Create a logger
     logger = logging.getLogger(name)
-    logger.setLevel(log_level)
     
-    # Create console handler and set level
-    console_handler = logging.StreamHandler(sys.stdout)
-    console_handler.setLevel(log_level)
-    
-    # Create formatter that supports Unicode characters
-    formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s', 
-                                  encoding='utf-8')
-    
-    # Add formatter to console handler
-    console_handler.setFormatter(formatter)
-    
-    # Add console handler to logger
-    logger.addHandler(console_handler)
+    # Prevent duplicate handlers
+    if not logger.handlers:
+        logger.setLevel(log_level)
+        
+        # Create console handler and set level
+        console_handler = logging.StreamHandler(sys.stdout)
+        console_handler.setLevel(log_level)
+        
+        # Create formatter that supports Unicode characters
+        formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+        
+        # Add formatter to console handler
+        console_handler.setFormatter(formatter)
+        
+        # Add console handler to logger
+        logger.addHandler(console_handler)
     
     return logger
 
