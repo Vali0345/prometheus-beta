@@ -11,7 +11,7 @@ def find_median_sorted_arrays(nums1: list[int], nums2: list[int]) -> float:
     
     Raises:
         TypeError: If inputs are not lists
-        ValueError: If inputs contain non-numeric elements
+        ValueError: If inputs contain non-numeric elements or are not sorted
     
     Examples:
         >>> find_median_sorted_arrays([1,3], [2])
@@ -27,6 +27,11 @@ def find_median_sorted_arrays(nums1: list[int], nums2: list[int]) -> float:
     if not (all(isinstance(x, (int, float)) for x in nums1) and 
             all(isinstance(x, (int, float)) for x in nums2)):
         raise ValueError("Lists must contain only numeric values")
+    
+    # Check if arrays are sorted
+    if not (all(nums1[i] <= nums1[i+1] for i in range(len(nums1)-1)) and 
+            all(nums2[i] <= nums2[i+1] for i in range(len(nums2)-1))):
+        raise ValueError("Input arrays must be sorted")
     
     # Ensure nums1 is the smaller array for optimization
     if len(nums1) > len(nums2):
@@ -62,4 +67,4 @@ def find_median_sorted_arrays(nums1: list[int], nums2: list[int]) -> float:
             left = partition_x + 1
     
     # If no valid partition found
-    raise ValueError("Input arrays must be sorted")
+    raise ValueError("Unable to find median")
