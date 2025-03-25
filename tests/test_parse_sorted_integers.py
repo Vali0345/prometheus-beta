@@ -23,7 +23,7 @@ def test_repeated_integers():
 
 def test_large_integers():
     """Test parsing large integers."""
-    assert parse_sorted_comma_integers("1000000,500,999999") == [500, 1000000, 999999]
+    assert parse_sorted_comma_integers("1000000,500,999999") == [500, 999999, 1000000]
 
 def test_whitespace_and_mixed_input():
     """Test parsing with whitespace and mixed inputs."""
