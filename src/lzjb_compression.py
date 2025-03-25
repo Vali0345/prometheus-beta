@@ -1,19 +1,18 @@
 """
-LZJB-Inspired Compression Algorithm
+Lightweight LZJB-Inspired Compression Algorithm
 
-A lightweight compression implementation that demonstrates 
-basic compression techniques.
+A basic implementation demonstrating compression principles.
 """
 
 def compress(data):
     """
-    Compress input data.
+    Compress input data using a simple matching algorithm.
     
     Args:
         data (bytes or bytearray): Input data to compress
     
     Returns:
-        bytearray: Compressed data
+        bytes: Compressed data
     
     Raises:
         TypeError: If input is not bytes or bytearray
@@ -26,22 +25,19 @@ def compress(data):
     if not data:
         raise ValueError("Input data cannot be empty")
     
-    # Compression parameters
     output = bytearray()
     input_len = len(data)
     input_idx = 0
     
     while input_idx < input_len:
         # Search for matching substrings
-        best_match_length = 0
-        best_match_offset = 0
+        best_length = 0
+        best_offset = 0
         
-        # Look back in a sliding window
+        # Look back in a compressed window
         window_start = max(0, input_idx - 1024)
-        window_end = input_idx
         
-        for offset in range(window_start, window_end):
-            # Compute potential match length
+        for offset in range(window_start, input_idx):
             match_length = 0
             max_match = min(8, input_len - input_idx)
             
@@ -49,33 +45,33 @@ def compress(data):
                    data[offset + match_length] == data[input_idx + match_length]):
                 match_length += 1
             
-            # Update best match if found
-            if match_length > best_match_length:
-                best_match_length = match_length
-                best_match_offset = input_idx - offset
+            # Update best match
+            if match_length > best_length:
+                best_length = match_length
+                best_offset = input_idx - offset
         
         # Encode match or literal
-        if best_match_length > 2:
+        if best_length > 2:
             # Match token
-            token = ((best_match_offset & 0x1FFF) << 3) | ((best_match_length - 3) & 0x07)
+            token = ((best_offset & 0x1FFF) << 3) | ((best_length - 3) & 0x07)
             output.append(token & 0xFF)
-            input_idx += best_match_length
+            input_idx += best_length
         else:
             # Literal
             output.append(data[input_idx])
             input_idx += 1
     
-    return output
+    return bytes(output)
 
 def decompress(compressed_data):
     """
-    Decompress data compressed by the compression function.
+    Decompress data using a matching reconstruction strategy.
     
     Args:
         compressed_data (bytes or bytearray): Compressed input data
     
     Returns:
-        bytearray: Decompressed data
+        bytes: Decompressed data
     
     Raises:
         TypeError: If input is not bytes or bytearray
@@ -88,7 +84,6 @@ def decompress(compressed_data):
     if not compressed_data:
         raise ValueError("Input data cannot be empty")
     
-    # Decompression buffer
     output = bytearray()
     input_idx = 0
     input_len = len(compressed_data)
@@ -101,18 +96,21 @@ def decompress(compressed_data):
             output.append(token)
         else:
             # Match token decoding
-            dist = (token >> 3) & 0x1FFF
+            offset = (token >> 3) & 0x1FFF
             length = (token & 0x07) + 3
             
-            # Reconstruct match
-            start_pos = len(output) - dist
+            # Match reconstruction
+            start = len(output) - offset
+            match = []
             
             for _ in range(length):
-                if 0 <= start_pos < len(output):
-                    output.append(output[start_pos])
-                    start_pos += 1
+                if 0 <= start < len(output):
+                    match.append(output[start])
+                    start += 1
                 else:
-                    # Fallback strategies
-                    output.append(output[-1] if output else 0)
+                    # Use last output byte or 0
+                    match.append(output[-1] if output else 0)
+            
+            output.extend(match)
     
-    return output
+    return bytes(output)
