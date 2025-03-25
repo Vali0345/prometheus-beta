@@ -49,7 +49,7 @@ def compress(data):
             match_length = 0
             while (input_idx + match_length < input_len and 
                    data[offset + match_length] == data[input_idx + match_length] and 
-                   match_length < 255):
+                   match_length < 8):  # Limit length to 8 bits
                 match_length += 1
             
             # Update best match if found
@@ -60,8 +60,8 @@ def compress(data):
         # Encode the match or literal
         if best_length > 2:
             # Encode match: [offset bits][length bits]
-            token = ((best_offset << 3) | (best_length - 3)) | 0x20
-            output.append(token)
+            token = ((best_offset & 0x1FFF) << 3) | ((best_length - 3) & 0x07)
+            output.append(token & 0xFF)
             input_idx += best_length
         else:
             # Encode literal
@@ -107,14 +107,14 @@ def decompress(compressed_data):
             offset = (token >> 3) & 0x1FFF
             length = (token & 0x07) + 3
             
-            # Reconstruct match
-            start = max(0, len(output) - offset)
+            # Reconstruct match with a different strategy
+            start = len(output) - offset
             for _ in range(length):
-                if start < len(output):
+                if start >= 0 and start < len(output):
                     output.append(output[start])
                     start += 1
                 else:
-                    # If start is beyond current output length, cycle through previous characters
-                    output.append(output[start % len(output)])
+                    # Repeat or use the first character if no match
+                    output.append(output[len(output) - 1] if output else 0)
     
     return output
