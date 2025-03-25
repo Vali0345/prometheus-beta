@@ -12,7 +12,7 @@ def test_negative_difference():
     """Test scenarios with negative differences"""
     A = [2, 3, 1, 5, 7, 0, 9, 4, 6, 8]
     B = [5, 6, 4, 8, 9, 3, 2, 7, 1, 0]
-    expected = [0, 0, 0, 0, 9, 0, 7, 0, 5, 8]
+    expected = [7, 7, 7, 7, 8, 7, 7, 7, 5, 8]
     assert array_difference_mod(A, B) == expected
 
 def test_equal_arrays():
