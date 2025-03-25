@@ -2,11 +2,10 @@
 LZJB Compression Algorithm Implementation
 
 This module provides a Python implementation of the LZJB compression algorithm.
-LZJB is a fast compression algorithm that provides a good balance between 
-compression speed and compression ratio.
+LZJB is a fast compression algorithm developed by Jeff Bonwick at Sun Microsystems.
 
 References:
-- Original LZJB algorithm by Jeff Bonwick (Sun Microsystems)
+- Original LZJB algorithm design
 """
 
 def compress(data):
@@ -36,20 +35,20 @@ def compress(data):
     input_idx = 0
     
     while input_idx < input_len:
-        # Look for the longest match in the previous window
+        # Try to find a match in previous window
         best_length = 0
         best_offset = 0
         
-        # Define search window (limit lookback to prevent excessive memory usage)
-        window_start = max(0, input_idx - 1024)
-        window_end = input_idx
+        # Define search window
+        search_start = max(0, input_idx - 1024)
+        search_end = input_idx
         
-        # Search for the longest match in the window
-        for offset in range(window_start, window_end):
+        for offset in range(search_start, search_end):
             match_length = 0
-            while (input_idx + match_length < input_len and 
-                   data[offset + match_length] == data[input_idx + match_length] and 
-                   match_length < 8):  # Limit length to 8 bits
+            max_match = min(8, input_len - input_idx)  # Limit match length
+            
+            while (match_length < max_match and 
+                   data[offset + match_length] == data[input_idx + match_length]):
                 match_length += 1
             
             # Update best match if found
@@ -57,14 +56,14 @@ def compress(data):
                 best_length = match_length
                 best_offset = input_idx - offset
         
-        # Encode the match or literal
+        # Encode match or literal
         if best_length > 2:
-            # Encode match: [offset bits][length bits]
+            # Match encoding: use top 13 bits for offset, bottom 3 for length
             token = ((best_offset & 0x1FFF) << 3) | ((best_length - 3) & 0x07)
             output.append(token & 0xFF)
             input_idx += best_length
         else:
-            # Encode literal
+            # Literal encoding
             output.append(data[input_idx])
             input_idx += 1
     
@@ -103,18 +102,24 @@ def decompress(compressed_data):
         if token < 32:  # Literal
             output.append(token)
         else:
-            # Decode match
+            # Decode match token
             offset = (token >> 3) & 0x1FFF
             length = (token & 0x07) + 3
             
-            # Reconstruct match with a different strategy
-            start = len(output) - offset
+            # Reconstruct match
+            match_start = len(output) - offset
+            
+            # Copy matched segment
             for _ in range(length):
-                if start >= 0 and start < len(output):
-                    output.append(output[start])
-                    start += 1
+                if match_start >= 0 and match_start < len(output):
+                    output.append(output[match_start])
+                    match_start += 1
                 else:
-                    # Repeat or use the first character if no match
-                    output.append(output[len(output) - 1] if output else 0)
+                    # Handle edge cases with repeated last element
+                    if output:
+                        output.append(output[-1])
+                    else:
+                        # Fallback to zero in extremely unlikely case of empty output
+                        output.append(0)
     
     return output
