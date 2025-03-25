@@ -16,5 +16,5 @@ def array_difference_mod(A, B):
     if len(A) != 10 or len(B) != 10:
         raise ValueError("Both input arrays must be of length 10")
     
-    # Use list comprehension for O(n) time complexity
+    # Modify the comprehension to handle negative differences
     return [max(0, (a - b) % 10) for a, b in zip(A, B)]
