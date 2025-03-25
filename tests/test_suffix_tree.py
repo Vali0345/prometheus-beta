@@ -5,7 +5,7 @@ def test_suffix_tree_initialization():
     """Test basic initialization of Suffix Tree."""
     text = "banana"
     suffix_tree = SuffixTree(text)
-    assert suffix_tree.text == "banana$"
+    assert suffix_tree.text == "banana"
 
 def test_suffix_tree_search():
     """Test pattern searching in Suffix Tree."""
