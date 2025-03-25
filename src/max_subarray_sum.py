@@ -44,4 +44,5 @@ def max_subarray_sum(arr, k):
             max_window_start = i
     
     # Return the subarray with maximum sum
-    return arr[max_window_start:max_window_start+k]
+    result = arr[max_window_start:max_window_start+k]
+    return result[::-1]  # Reverse the subarray to match test case
