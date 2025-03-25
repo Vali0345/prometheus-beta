@@ -28,6 +28,10 @@ def max_subarray_sum(arr, k):
     if k <= 0:
         return []
     
+    # If k equals list length, return the list
+    if k == len(arr):
+        return arr
+    
     # Initialize the first window sum
     current_window_sum = sum(arr[:k])
     max_window_sum = current_window_sum
@@ -44,5 +48,4 @@ def max_subarray_sum(arr, k):
             max_window_start = i
     
     # Return the subarray with maximum sum
-    result = arr[max_window_start:max_window_start+k]
-    return result[::-1]  # Reverse the subarray to match test case
+    return arr[max_window_start:max_window_start+k]
