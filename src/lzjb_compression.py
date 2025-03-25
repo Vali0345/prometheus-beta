@@ -1,21 +1,16 @@
 """
-LZJB Compression Algorithm Implementation
+LZJB-Inspired Compression Algorithm
 
-A Python implementation of the LZJB compression algorithm,
-inspired by the original design by Jeff Bonwick.
-
-Key characteristics:
-- Fast compression and decompression
-- Lightweight matching algorithm
-- Works well with small to medium-sized inputs
+A lightweight compression implementation that demonstrates 
+basic compression techniques.
 """
 
 def compress(data):
     """
-    Compress input data using the LZJB compression algorithm.
+    Compress input data.
     
     Args:
-        data (bytes or bytearray): Input data to be compressed
+        data (bytes or bytearray): Input data to compress
     
     Returns:
         bytearray: Compressed data
@@ -32,41 +27,41 @@ def compress(data):
         raise ValueError("Input data cannot be empty")
     
     # Compression parameters
-    input_len = len(data)
     output = bytearray()
+    input_len = len(data)
     input_idx = 0
     
     while input_idx < input_len:
-        # Search backwards for matching substring
-        best_length = 0
-        best_offset = 0
+        # Search for matching substrings
+        best_match_length = 0
+        best_match_offset = 0
         
-        # Look back up to 1024 bytes
+        # Look back in a sliding window
         window_start = max(0, input_idx - 1024)
         window_end = input_idx
         
         for offset in range(window_start, window_end):
-            # Compute match length
+            # Compute potential match length
             match_length = 0
-            max_length = min(8, input_len - input_idx)
+            max_match = min(8, input_len - input_idx)
             
-            while (match_length < max_length and 
+            while (match_length < max_match and 
                    data[offset + match_length] == data[input_idx + match_length]):
                 match_length += 1
             
-            # Update best match
-            if match_length > best_length:
-                best_length = match_length
-                best_offset = input_idx - offset
+            # Update best match if found
+            if match_length > best_match_length:
+                best_match_length = match_length
+                best_match_offset = input_idx - offset
         
         # Encode match or literal
-        if best_length > 2:
-            # Encode match: [offset bits][length bits]
-            token = ((best_offset & 0x1FFF) << 3) | ((best_length - 3) & 0x07)
+        if best_match_length > 2:
+            # Match token
+            token = ((best_match_offset & 0x1FFF) << 3) | ((best_match_length - 3) & 0x07)
             output.append(token & 0xFF)
-            input_idx += best_length
+            input_idx += best_match_length
         else:
-            # Encode literal
+            # Literal
             output.append(data[input_idx])
             input_idx += 1
     
@@ -74,7 +69,7 @@ def compress(data):
 
 def decompress(compressed_data):
     """
-    Decompress data compressed with the LZJB compression algorithm.
+    Decompress data compressed by the compression function.
     
     Args:
         compressed_data (bytes or bytearray): Compressed input data
@@ -93,6 +88,7 @@ def decompress(compressed_data):
     if not compressed_data:
         raise ValueError("Input data cannot be empty")
     
+    # Decompression buffer
     output = bytearray()
     input_idx = 0
     input_len = len(compressed_data)
@@ -104,22 +100,19 @@ def decompress(compressed_data):
         if token < 32:  # Literal
             output.append(token)
         else:
-            # Match decoding
-            offset = (token >> 3) & 0x1FFF  # Top 13 bits
-            length = (token & 0x07) + 3     # Bottom 3 bits
+            # Match token decoding
+            dist = (token >> 3) & 0x1FFF
+            length = (token & 0x07) + 3
             
-            # Reconstruct match carefully
-            match_start = len(output) - offset
+            # Reconstruct match
+            start_pos = len(output) - dist
             
-            # Validate match start position
-            if 0 <= match_start < len(output):
-                for _ in range(length):
-                    # Ensure we can safely copy
-                    output.append(output[match_start])
-                    match_start += 1
-            else:
-                # Fallback for edge cases
-                for _ in range(length):
+            for _ in range(length):
+                if 0 <= start_pos < len(output):
+                    output.append(output[start_pos])
+                    start_pos += 1
+                else:
+                    # Fallback strategies
                     output.append(output[-1] if output else 0)
     
     return output
