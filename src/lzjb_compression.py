@@ -1,12 +1,13 @@
 """
-Simple LZJB-inspired Compression Algorithm
+LZJB-inspired Compression Algorithm
 
-A simplified implementation focusing on core compression principles.
+A lightweight compression implementation designed to showcase 
+basic compression techniques.
 """
 
 def compress(data):
     """
-    Compress input data using a lightweight compression approach.
+    Compress input data.
     
     Args:
         data (bytes or bytearray): Input data to compress
@@ -25,19 +26,20 @@ def compress(data):
     if not data:
         raise ValueError("Input data cannot be empty")
     
+    # Output buffer 
     output = bytearray()
     input_len = len(data)
     input_idx = 0
     
     while input_idx < input_len:
-        # Look for matching sequences
-        match_found = False
-        
-        # Define search window
+        # Define window for matching
         window_start = max(0, input_idx - 1024)
+        best_match_length = 0
+        best_match_offset = 0
         
+        # Search for longest match
         for offset in range(window_start, input_idx):
-            # Try to find the longest match
+            # Compute match length 
             match_length = 0
             max_match = min(8, input_len - input_idx)
             
@@ -45,18 +47,19 @@ def compress(data):
                    data[offset + match_length] == data[input_idx + match_length]):
                 match_length += 1
             
-            # If a decent match is found
-            if match_length > 2:
-                # Encode match
-                distance = input_idx - offset
-                token = ((distance & 0x1FFF) << 3) | ((match_length - 3) & 0x07)
-                output.append(token & 0xFF)
-                input_idx += match_length
-                match_found = True
-                break
+            # Update best match if longer
+            if match_length > best_match_length:
+                best_match_length = match_length
+                best_match_offset = input_idx - offset
         
-        # If no match found, encode literal
-        if not match_found:
+        # Encode match or literal
+        if best_match_length > 2:
+            # Match token
+            token = ((best_match_offset & 0x1FFF) << 3) | ((best_match_length - 3) & 0x07)
+            output.append(token & 0xFF)
+            input_idx += best_match_length
+        else:
+            # Literal 
             output.append(data[input_idx])
             input_idx += 1
     
@@ -83,6 +86,7 @@ def decompress(compressed_data):
     if not compressed_data:
         raise ValueError("Input data cannot be empty")
     
+    # Output buffer
     output = bytearray()
     input_idx = 0
     input_len = len(compressed_data)
@@ -91,24 +95,21 @@ def decompress(compressed_data):
         token = compressed_data[input_idx]
         input_idx += 1
         
-        # Literal byte
-        if token < 32:
+        if token < 32:  # Literal byte
             output.append(token)
         else:
-            # Match token
-            distance = (token >> 3) & 0x1FFF
+            # Match token decoding
+            dist = (token >> 3) & 0x1FFF
             length = (token & 0x07) + 3
             
-            # Reconstruct match
-            match_start = len(output) - distance
-            
-            # Handle match reconstruction carefully
+            # Match reconstruction 
+            start_pos = len(output) - dist
             for _ in range(length):
-                if 0 <= match_start < len(output):
-                    output.append(output[match_start])
-                    match_start += 1
+                if 0 <= start_pos < len(output):
+                    output.append(output[start_pos])
+                    start_pos += 1
                 else:
-                    # Fallback for edge cases
+                    # Handle edge cases 
                     output.append(output[-1] if output else 0)
     
     return output
